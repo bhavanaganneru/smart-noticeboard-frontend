@@ -1,149 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Admin - View Notices</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
-<style>
-  body{
-    margin:0;
-    font-family:"Segoe UI",sans-serif;
-    background:#eef4ff;
-  }
-  .admin-bar{
-    background:#0a3cff;
-    padding:12px 18px;
-    color:#fff;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .admin-bar a{
-    color:#fff;
-    text-decoration:none;
-    margin-left:16px;
-    font-size:13px;
-  }
-  .container{
-    max-width:900px;
-    margin:20px auto;
-    padding:12px;
-  }
-  h1{
-    margin:0 0 10px;
-    font-size:22px;
-    color:#0a3cff;
-  }
-  p.sub{
-    margin:0 0 16px;
-    font-size:13px;
-    color:#555;
-  }
-  .notice-card{
-    background:#fff;
-    padding:14px 16px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom:12px;
-  }
-  .notice-card h3{
-    margin:0 0 6px;
-    font-size:16px;
-  }
-  .meta{
-    font-size:12px;
-    color:#666;
-    margin-bottom:6px;
-  }
-  .tag{
-    display:inline-block;
-    padding:2px 8px;
-    font-size:11px;
-    border-radius:10px;
-    background:#e0edff;
-    color:#0a3cff;
-    margin-right:4px;
-  }
-  .actions{
-    margin-top:8px;
-    font-size:12px;
-  }
-  .link-btn{
-    background:none;
-    border:none;
-    padding:0;
-    cursor:pointer;
-    font-size:12px;
-    color:#0a3cff;
-    margin-right:10px;
-  }
-</style>
-</head>
+const app = express();
+const PORT = process.env.PORT || 10000;
 
-<body>
+app.use(cors());
+app.use(express.json());
 
-<div class="admin-bar">
-  <div><strong>Admin Panel</strong> · View Notices</div>
-  <div>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="index.html">Main Site</a>
-  </div>
-</div>
+const DATA_FILE = path.join(__dirname, "notices.json");
 
-<div class="container">
-  <h1>📁 All Notices</h1>
-  <p class="sub">Live notices fetched from backend.</p>
-
-  <div id="notices"></div>
-</div>
-
-<script>
-const API = "https://smart-noticeboard-backend.onrender.com/notices";
-
-async function loadNotices() {
-  const res = await fetch(API);
-  const notices = await res.json();
-
-  const container = document.getElementById("notices");
-  container.innerHTML = "";
-
-  if (notices.length === 0) {
-    container.innerHTML = "<p>No notices available.</p>";
-    return;
-  }
-
-  notices.reverse().forEach(n => {
-    const div = document.createElement("div");
-    div.className = "notice-card";
-
-    div.innerHTML = `
-      <h3>${n.title || "Untitled Notice"}</h3>
-      <p class="meta">
-        <span class="tag">${n.type || "General"}</span>
-        <span class="tag">Year: ${n.year || "ALL"}</span>
-        <span class="tag">Branch: ${n.branch || "ALL"}</span>
-        <span class="tag">${n.date || ""}</span>
-      </p>
-      <p>${n.body || ""}</p>
-      <div class="actions">
-        <button class="link-btn" onclick="deleteNotice(${n.id})">🗑 Delete</button>
-      </div>
-    `;
-
-    container.appendChild(div);
-  });
+/* Ensure notices.json exists */
+if (!fs.existsSync(DATA_FILE)) {
+  fs.writeFileSync(DATA_FILE, "[]", "utf8");
 }
 
-async function deleteNotice(id) {
-  if (!confirm("Delete this notice?")) return;
+/* Helpers */
+const readNotices = () =>
+  JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
 
-  await fetch(`${API}/${id}`, { method: "DELETE" });
-  loadNotices();
-}
+const writeNotices = (data) =>
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
-loadNotices();
-</script>
+/* Home check */
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>📢 Smart Notice Board Backend</h1>
+    <p>Status: Running ✅</p>
+  `);
+});
 
-</body>
-</html>
+/* GET all notices */
+app.get("/notices", (req, res) => {
+  res.json(readNotices());
+});
+
+/* POST new notice */
+app.post("/notices", (req, res) => {
+  const notices = readNotices();
+
+  const newNotice = {
+    id: Date.now(),
+    ...req.body
+  };
+
+  notices.push(newNotice);
+  writeNotices(notices);
+
+  res.json({ message: "Notice saved", notice: newNotice });
+});
+
+/* ✅ DELETE notice by ID */
+app.delete("/notices/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const notices = readNotices();
+  const updated = notices.filter(n => n.id !== id);
+
+  writeNotices(updated);
+
+  res.json({ message: "Notice deleted" });
+});
+
+/* Start server */
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
