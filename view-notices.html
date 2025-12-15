@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin - View Notices (Demo)</title>
+<title>Admin - View Notices</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
   body{
     margin:0;
@@ -69,22 +70,21 @@
     font-size:12px;
   }
   .link-btn{
-    text-decoration:none;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
     font-size:12px;
     color:#0a3cff;
     margin-right:10px;
   }
-
-  @media (max-width:600px){
-    .container{ margin:10px; }
-    h1{ font-size:19px; }
-  }
 </style>
 </head>
+
 <body>
 
 <div class="admin-bar">
-  <div><strong>Admin Panel</strong> · View Notices (Demo)</div>
+  <div><strong>Admin Panel</strong> · View Notices</div>
   <div>
     <a href="dashboard.html">Dashboard</a>
     <a href="index.html">Main Site</a>
@@ -92,58 +92,58 @@
 </div>
 
 <div class="container">
-  <h1>📁 All Notices (Sample)</h1>
-  <p class="sub">These are sample cards just to show how real data will look here later.</p>
+  <h1>📁 All Notices</h1>
+  <p class="sub">Live notices fetched from backend.</p>
 
-  <div class="notice-card">
-    <h3>Mid-Term Exams Schedule Released</h3>
-    <p class="meta">
-      <span class="tag">Exam</span>
-      <span class="tag">Year: 2</span>
-      <span class="tag">Branch: CSE</span>
-      <span class="tag">Date: 10-01-2025</span>
-    </p>
-    <p>Mid-term exams for all CSE 2nd year students will begin from 10th January. Check the timetable PDF.</p>
-    <div class="actions">
-      <a href="#" class="link-btn">🔍 View</a>
-      <a href="#" class="link-btn">✏️ Edit</a>
-      <a href="#" class="link-btn">🗑 Delete</a>
-    </div>
-  </div>
-
-  <div class="notice-card">
-    <h3>TCS Campus Drive</h3>
-    <p class="meta">
-      <span class="tag">Placement</span>
-      <span class="tag">Company: TCS</span>
-      <span class="tag">Year: 4</span>
-      <span class="tag">All Branches</span>
-    </p>
-    <p>TCS drive for 4th year students. Online test followed by interview rounds. Registration link will be shared soon.</p>
-    <div class="actions">
-      <a href="#" class="link-btn">🔍 View</a>
-      <a href="#" class="link-btn">✏️ Edit</a>
-      <a href="#" class="link-btn">🗑 Delete</a>
-    </div>
-  </div>
-
-  <div class="notice-card">
-    <h3>Workshop on AI & ML</h3>
-    <p class="meta">
-      <span class="tag">Workshop</span>
-      <span class="tag">CSE (AIML)</span>
-      <span class="tag">3rd Year</span>
-      <span class="tag">Offline</span>
-    </p>
-    <p>One day workshop on Artificial Intelligence and Machine Learning in the main seminar hall.</p>
-    <div class="actions">
-      <a href="#" class="link-btn">🔍 View</a>
-      <a href="#" class="link-btn">✏️ Edit</a>
-      <a href="#" class="link-btn">🗑 Delete</a>
-    </div>
-  </div>
-
+  <div id="notices"></div>
 </div>
+
+<script>
+const API = "https://smart-noticeboard-backend.onrender.com/notices";
+
+async function loadNotices() {
+  const res = await fetch(API);
+  const notices = await res.json();
+
+  const container = document.getElementById("notices");
+  container.innerHTML = "";
+
+  if (notices.length === 0) {
+    container.innerHTML = "<p>No notices available.</p>";
+    return;
+  }
+
+  notices.reverse().forEach(n => {
+    const div = document.createElement("div");
+    div.className = "notice-card";
+
+    div.innerHTML = `
+      <h3>${n.title || "Untitled Notice"}</h3>
+      <p class="meta">
+        <span class="tag">${n.type || "General"}</span>
+        <span class="tag">Year: ${n.year || "ALL"}</span>
+        <span class="tag">Branch: ${n.branch || "ALL"}</span>
+        <span class="tag">${n.date || ""}</span>
+      </p>
+      <p>${n.body || ""}</p>
+      <div class="actions">
+        <button class="link-btn" onclick="deleteNotice(${n.id})">🗑 Delete</button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+async function deleteNotice(id) {
+  if (!confirm("Delete this notice?")) return;
+
+  await fetch(`${API}/${id}`, { method: "DELETE" });
+  loadNotices();
+}
+
+loadNotices();
+</script>
 
 </body>
 </html>
