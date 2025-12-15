@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Notice Board - Pragati Engineering College</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{margin:0;font-family:"Segoe UI",sans-serif;background:#eef4ff;}
+  header{background:linear-gradient(90deg,#0a3cff,#5b8dff);color:#fff;padding:16px;text-align:center;}
+  header h1{margin:0;font-size:26px;} header p{margin:4px 0 0;font-size:14px;}
+
+  .nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;background:#fff;
+       box-shadow:0 2px 5px rgba(0,0,0,0.1);padding:8px;position:sticky;top:0;z-index:20;}
+  .nav button{border:none;border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;background:#e0e7ff;color:#0a3cff;}
+  .nav button.active{background:#0a3cff;color:#fff;}
+
+  .page-container{max-width:1000px;margin:16px auto 32px;padding:0 12px 30px;}
+  .section{display:none;} .section.active{display:block;}
+  .section-title{font-size:20px;font-weight:600;margin:10px 0 6px;}
+  .section-sub{font-size:13px;color:#555;margin-bottom:10px;}
+
+  .filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-start;margin:10px 0 14px;}
+  .filters select,.filters input{padding:8px 12px;font-size:13px;border-radius:6px;border:2px solid #0a3cff;color:#0a3cff;outline:none;min-width:130px;}
+
+  .notice{background:#fff;margin:10px 0;padding:14px;border-radius:10px;border-left:6px solid #0a3cff;box-shadow:0 3px 6px rgba(0,0,0,0.12);}
+  .notice h3{margin:0 0 6px;font-size:17px;} .notice p{margin:4px 0;font-size:14px;}
+  .meta{font-size:12px;color:#555;}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#e0edff;color:#0a3cff;margin-right:6px;}
+  .btn-link{display:inline-block;margin-top:6px;padding:6px 10px;border-radius:6px;background:#0a3cff;color:#fff;font-size:13px;text-decoration:none;}
+  .no-results,.empty-msg{text-align:center;color:#555;margin-top:18px;font-size:14px;}
+  footer{text-align:center;font-size:12px;color:#555;margin:10px 0 20px;} footer a{color:#0a3cff;text-decoration:none;}
+
+  .top-error{background:#ffe6e6;color:#7a0000;padding:10px;border-radius:8px;margin:10px 0;text-align:center;display:none;}
+  @media (max-width:600px){ .nav{padding:6px;gap:6px;} .nav button{font-size:11px;padding:6px 10px;} .page-container{margin:10px auto 24px;padding:0 8px 20px;} .section-title{font-size:18px;} .filters{flex-direction:column;} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Notice Board</h1>
+  <p>🎓 Pragati Engineering College — All Updates in One Place</p>
+</header>
+
+<div class="nav">
+  <button class="active" data-section="examSection">📚 Examination</button>
+  <button data-section="courseSection">📘 Course Structures</button>
+  <button data-section="workshopSection">🛠️ Workshops</button>
+  <button data-section="technicalSection">🧑‍💻 Technical Events</button>
+  <button data-section="culturalSection">🎭 Cultural Events</button>
+  <button data-section="placementSection">💼 Placements & Packages</button>
+</div>
+
+<div class="page-container">
+  <div id="topError" class="top-error"></div>
+
+  <!-- EXAM -->
+  <section id="examSection" class="section active">
+    <div class="section-title">📚 Examination Timetable</div>
+    <div class="section-sub">Mid 1 • Mid 2 • Semester • Internals • Externals</div>
+    <div class="filters">
+      <select id="exam_yearFilter"><option value="all">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="exam_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <select id="exam_typeFilter"><option value="all">All Exam Types</option><option value="Mid">Mid Exams</option><option value="Semester">Semester</option><option value="Internal">Internals</option><option value="External">Externals</option></select>
+      <input type="text" id="exam_searchBox" placeholder="Search in exam notices 🔍">
+    </div>
+    <div id="exam_noticeList"></div>
+    <p id="exam_noResults" class="no-results" style="display:none;">😕 No exam notices match this filter.</p>
+    <p id="exam_emptyMsg" class="empty-msg">📂 No examination notices uploaded yet.</p>
+  </section>
+
+  <!-- COURSE -->
+  <section id="courseSection" class="section">
+    <div class="section-title">📘 Course Structures</div>
+    <div class="section-sub">All Years • All Branches • Regulations</div>
+    <div class="filters">
+      <select id="course_yearFilter"><option value="all">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="course_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <select id="course_regFilter"><option value="all">All Regulations</option><option value="R23">R23</option><option value="R20">R20</option><option value="R19">R19</option></select>
+      <input type="text" id="course_searchBox" placeholder="Search course / subject 🔍">
+    </div>
+    <div id="course_noticeList"></div>
+    <p id="course_noResults" class="no-results" style="display:none;">😕 No course notices match this filter.</p>
+    <p id="course_emptyMsg" class="empty-msg">📂 No course structures uploaded yet.</p>
+  </section>
+
+  <!-- WORKSHOP -->
+  <section id="workshopSection" class="section">
+    <div class="section-title">🛠️ Workshops</div>
+    <div class="section-sub">Technical / Soft Skills / FDP / Seminars</div>
+    <div class="filters">
+      <select id="work_yearFilter"><option value="all">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="work_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <select id="work_modeFilter"><option value="all">All Modes</option><option value="Online">Online</option><option value="Offline">Offline</option></select>
+      <input type="text" id="work_searchBox" placeholder="Search workshop / topic 🔍">
+    </div>
+    <div id="work_noticeList"></div>
+    <p id="work_noResults" class="no-results" style="display:none;">😕 No workshops match this filter.</p>
+    <p id="work_emptyMsg" class="empty-msg">📂 No workshops uploaded yet.</p>
+  </section>
+
+  <!-- TECH -->
+  <section id="technicalSection" class="section">
+    <div class="section-title">🧑‍💻 Technical Events</div>
+    <div class="section-sub">Hackathons • Coding • Paper Presentations • Tech Fests</div>
+    <div class="filters">
+      <select id="tech_yearFilter"><option value="all">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="tech_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <select id="tech_typeFilter"><option value="all">All Types</option><option value="Hackathon">Hackathon</option><option value="Coding Contest">Coding Contest</option><option value="Paper Presentation">Paper Presentation</option><option value="Tech Fest">Tech Fest</option></select>
+      <input type="text" id="tech_searchBox" placeholder="Search event / theme 🔍">
+    </div>
+    <div id="tech_noticeList"></div>
+    <p id="tech_noResults" class="no-results" style="display:none;">😕 No technical events match this filter.</p>
+    <p id="tech_emptyMsg" class="empty-msg">📂 No technical events added yet.</p>
+  </section>
+
+  <!-- CULTURAL -->
+  <section id="culturalSection" class="section">
+    <div class="section-title">🎭 Cultural Events</div>
+    <div class="section-sub">Fests • Dept Days • Competitions • Celebrations</div>
+    <div class="filters">
+      <select id="cult_yearFilter"><option value="all">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="cult_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <select id="cult_eventFilter"><option value="all">All Cultural Types</option><option value="Fest">Fest</option><option value="Dept Day">Department Day</option><option value="Competition">Competition</option><option value="Celebration">Celebration</option></select>
+      <input type="text" id="cult_searchBox" placeholder="Search event / activity 🔍">
+    </div>
+    <div id="cult_noticeList"></div>
+    <p id="cult_noResults" class="no-results" style="display:none;">😕 No cultural events match this filter.</p>
+    <p id="cult_emptyMsg" class="empty-msg">📂 No cultural events added yet.</p>
+  </section>
+
+  <!-- PLACEMENTS -->
+  <section id="placementSection" class="section">
+    <div class="section-title">💼 Placements & Packages</div>
+    <div class="section-sub">Drives • Selections • Training • Company-wise Packages</div>
+    <div class="filters">
+      <select id="place_yearFilter"><option value="all">All Years</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
+      <select id="place_branchFilter"><option value="all">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="EEE">EEE</option><option value="ME">ME</option><option value="CIVIL">CIVIL</option></select>
+      <input type="text" id="place_searchBox" placeholder="Search company / role 🔍">
+    </div>
+    <div id="place_noticeList"></div>
+    <p id="place_noResults" class="no-results" style="display:none;">😕 No placements match this filter.</p>
+    <p id="place_emptyMsg" class="empty-msg">📂 No placement notices added yet.</p>
+  </section>
+
+</div>
+
+<footer>© <span id="yearSpan"></span> Pragati Engineering College — Smart Notice Board · <a href="login.html">Admin Login</a></footer>
+
+<script>
+/* -----------------------------
+     BACKEND CONFIGURATION
+------------------------------*/
+const BACKEND_URL = "https://smart-noticeboard-backend.onrender.com";
+
+/* -----------------------------
+      NAVIGATION (works same)
+------------------------------*/
+document.getElementById("yearSpan").textContent = new Date().getFullYear();
+const navButtons = document.querySelectorAll(".nav button");
+const sections   = document.querySelectorAll(".section");
+
+function showSection(id){
+  sections.forEach(sec => sec.classList.toggle("active", sec.id === id));
+  navButtons.forEach(btn=> btn.classList.toggle("active", btn.dataset.section === id));
+}
+navButtons.forEach(btn=> btn.addEventListener("click", () => showSection(btn.dataset.section)));
+
+/* -----------------------------
+      GLOBAL NOTICE STORAGE
+------------------------------*/
+let allNotices = [];
+const fileURL = n => n.fileUrl || n.file || "";
+
+/* -----------------------------
+      CARD GENERATOR
+------------------------------*/
+function makeCard(n, icon){
+  let div = document.createElement("div");
+  div.className = "notice";
+
+  const tags = [];
+  if(n.type)   tags.push(`<span class="tag">${n.type}</span>`);
+  if(n.year)   tags.push(`<span class="tag">Year: ${n.year}</span>`);
+  if(n.branch) tags.push(`<span class="tag">${n.branch}</span>`);
+  if(n.date)   tags.push(`<span class="tag">📅 ${n.date}</span>`);
+
+  const pdf = fileURL(n);
+  const pdfBtn = pdf ? `<a class="btn-link" href="${pdf}" target="_blank">📄 View PDF</a>` : "";
+
+  div.innerHTML = `
+      <h3>${icon || ""} ${n.title}</h3>
+      <p class="meta">${tags.join(" ")}</p>
+      <p>${n.body}</p>
+      ${pdfBtn}
+  `;
+  return div;
+}
+
+/* -----------------------------
+   GENERIC RENDER FUNCTION
+------------------------------*/
+function render(listBox, emptyMsg, noMsg, data, filters, icon){
+  listBox.innerHTML = "";
+
+  if(!data.length){
+    emptyMsg.style.display="block";
+    noMsg.style.display="none";
+    return;
+  }
+
+  emptyMsg.style.display="none";
+
+  const f = data.filter(n=>{
+    if(filters.year !== "all" && n.year !== filters.year && n.year !== "ALL") return false;
+    if(filters.branch !== "all" && n.branch !== filters.branch && n.branch !== "ALL") return false;
+
+    if(filters.q){
+      const text = `${n.title} ${n.body}`.toLowerCase();
+      if(!text.includes(filters.q.toLowerCase())) return false;
+    }
+
+    return true;
+  });
+
+  if(!f.length){
+    noMsg.style.display="block";
+    return;
+  }
+
+  noMsg.style.display="none";
+  f.forEach(n=> listBox.appendChild(makeCard(n, icon)));
+}
+
+/* -----------------------------
+     SECTION: EXAM
+------------------------------*/
+let examNotices = [];
+const examList = document.getElementById("exam_noticeList");
+const examEmpty = document.getElementById("exam_emptyMsg");
+const examNo = document.getElementById("exam_noResults");
+
+function renderExam(){
+  render(examList, examEmpty, examNo, examNotices, {
+    year: exam_yearFilter.value,
+    branch: exam_branchFilter.value,
+    q: exam_searchBox.value.trim()
+  }, "📚");
+}
+exam_yearFilter.onchange = renderExam;
+exam_branchFilter.onchange = renderExam;
+exam_searchBox.oninput = renderExam;
+exam_typeFilter.onchange = renderExam;
+
+/* -----------------------------
+     SECTION: COURSES
+------------------------------*/
+let courseNotices = [];
+function renderCourses(){
+  render(course_noticeList, course_emptyMsg, course_noResults, courseNotices, {
+    year: course_yearFilter.value,
+    branch: course_branchFilter.value,
+    q: course_searchBox.value.trim()
+  }, "📘");
+}
+course_yearFilter.onchange = renderCourses;
+course_branchFilter.onchange = renderCourses;
+course_searchBox.oninput = renderCourses;
+
+/* -----------------------------
+     SECTION: WORKSHOPS
+------------------------------*/
+let workshopNotices = [];
+function renderWorkshops(){
+  render(work_noticeList, work_emptyMsg, work_noResults, workshopNotices, {
+    year: work_yearFilter.value,
+    branch: work_branchFilter.value,
+    q: work_searchBox.value.trim()
+  }, "🛠️");
+}
+work_yearFilter.onchange = renderWorkshops;
+work_branchFilter.onchange = renderWorkshops;
+work_searchBox.oninput = renderWorkshops;
+
+/* -----------------------------
+     SECTION: TECH EVENTS
+------------------------------*/
+let techNotices = [];
+function renderTech(){
+  render(tech_noticeList, tech_emptyMsg, tech_noResults, techNotices, {
+    year: tech_yearFilter.value,
+    branch: tech_branchFilter.value,
+    q: tech_searchBox.value.trim()
+  }, "🧑‍💻");
+}
+tech_yearFilter.onchange = renderTech;
+tech_branchFilter.onchange = renderTech;
+tech_searchBox.oninput = renderTech;
+
+/* -----------------------------
+     SECTION: CULTURAL EVENTS
+------------------------------*/
+let cultNotices = [];
+function renderCult(){
+  render(cult_noticeList, cult_emptyMsg, cult_noResults, cultNotices, {
+    year: cult_yearFilter.value,
+    branch: cult_branchFilter.value,
+    q: cult_searchBox.value.trim()
+  }, "🎭");
+}
+cult_yearFilter.onchange = renderCult;
+cult_branchFilter.onchange = renderCult;
+cult_searchBox.oninput = renderCult;
+
+/* -----------------------------
+     SECTION: PLACEMENTS
+------------------------------*/
+let placeNotices = [];
+function renderPlace(){
+  render(place_noticeList, place_emptyMsg, place_noResults, placeNotices, {
+    year: place_yearFilter.value,
+    branch: place_branchFilter.value,
+    q: place_searchBox.value.trim()
+  }, "💼");
+}
+place_yearFilter.onchange = renderPlace;
+place_branchFilter.onchange = renderPlace;
+place_searchBox.oninput = renderPlace;
+
+/* -----------------------------
+     LOAD ALL NOTICES FROM BACKEND
+------------------------------*/
+async function loadNotices(){
+  try {
+    const res = await fetch(`${BACKEND_URL}/notices`);
+    const data = await res.json();
+
+    allNotices = data;
+
+    examNotices     = data.filter(n=>["exam","examination","mid"].includes(n.type?.toLowerCase()));
+    courseNotices   = data.filter(n=>n.type?.toLowerCase() === "course");
+    workshopNotices = data.filter(n=>n.type?.toLowerCase() === "workshop");
+    techNotices     = data.filter(n=>n.type?.toLowerCase() === "technical");
+    cultNotices     = data.filter(n=>n.type?.toLowerCase() === "cultural");
+    placeNotices    = data.filter(n=>n.type?.toLowerCase() === "placement");
+
+    renderExam();
+    renderCourses();
+    renderWorkshops();
+    renderTech();
+    renderCult();
+    renderPlace();
+
+  } catch(err){
+    console.error("Failed to load notices", err);
+  }
+}
+
+loadNotices();
+setInterval(loadNotices, 60000);
+</script>
+
+</body>
+</html>

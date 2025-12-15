@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard - Smart Notice Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    margin:0; font-family:"Segoe UI",sans-serif; background:#eef4ff;
+  }
+  header {
+    background:#0a3cff; padding:14px; color:#fff;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .container { max-width:900px; margin:20px auto; padding:12px; }
+  .card {
+    background:#fff; padding:18px; margin:12px 0;
+    border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  }
+  h3{ margin:0 0 8px; }
+  a.btn{
+    display:inline-block; padding:8px 16px;
+    background:#0a3cff; color:#fff; border-radius:8px;
+    text-decoration:none;
+  }
+  .logout{ background:#ff0033; }
+</style>
+</head>
+<body>
+
+<header>
+  <h2>Admin Dashboard</h2>
+  <a href="login.html" class="btn logout">Logout</a>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h3>📤 Upload New Notice</h3>
+    <p>Add placement drives, brochures, timetables etc.</p>
+    <a href="upload.html" class="btn">Add Notice</a>
+  </div>
+
+  <div class="card">
+    <h3>📁 Manage All Notices</h3>
+    <p>Edit / Delete previously uploaded notices</p>
+    <a href="view-notices.html" class="btn">View Notices</a>
+
+  </div>
+
+</div>
+
+</body>
+</html>

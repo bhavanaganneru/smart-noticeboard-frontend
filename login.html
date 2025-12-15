@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login - Smart Notice Board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{
+    margin:0;
+    font-family:"Segoe UI",sans-serif;
+    background:linear-gradient(135deg,#0a3cff,#5b8dff);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card{
+    background:#fff;
+    width:320px;
+    padding:26px 26px 22px;
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    text-align:center;
+  }
+  h1{
+    margin:0 0 6px;
+    font-size:22px;
+    color:#0a3cff;
+  }
+  p.subtitle{
+    margin:0 0 18px;
+    font-size:13px;
+    color:#555;
+  }
+  .field{
+    text-align:left;
+    margin-bottom:10px;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    margin-bottom:4px;
+    color:#333;
+  }
+  input{
+    width:100%;
+    padding:9px 10px;
+    border-radius:8px;
+    border:2px solid #0a3cff;
+    font-size:13px;
+    outline:none;
+    box-sizing:border-box;
+  }
+  button{
+    width:100%;
+    margin-top:12px;
+    padding:9px 10px;
+    border:none;
+    border-radius:8px;
+    background:#0a3cff;
+    color:#fff;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{
+    opacity:0.9;
+  }
+  .error{
+    margin-top:8px;
+    font-size:13px;
+    color:#ff0033;
+    display:none;
+  }
+  .note{
+    margin-top:14px;
+    font-size:11px;
+    color:#777;
+  }
+  .note a{
+    color:#0a3cff;
+    text-decoration:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Admin Login</h1>
+  <p class="subtitle">Smart Notice Board · Pragati Engineering College</p>
+
+  <div class="field">
+    <label for="username">Username</label>
+    <input id="username" placeholder="admin">
+  </div>
+
+  <div class="field">
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="•••••">
+  </div>
+
+  <button onclick="login()">Login</button>
+
+  <p id="errorMsg" class="error">Invalid username or password.</p>
+
+  <p class="note">
+    Back to <a href="index.html">Smart Notice Board</a>
+  </p>
+</div>
+
+<script>
+  async function login() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    const msg  = document.getElementById("errorMsg");
+
+    // Simple frontend-only login for now
+    // You can change these later
+    const ADMIN_USER = "admin";
+    const ADMIN_PASS = "1234";
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      // mark as logged in
+      localStorage.setItem("isAdminLoggedIn", "yes");
+      // go to upload page (admin form)
+      window.location.href = "upload.html";
+    } else {
+      msg.style.display = "block";
+    }
+  }
+
+  // Allow Enter key to submit
+  document.getElementById("password").addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
+  });
+</script>
+
+</body>
+</html>

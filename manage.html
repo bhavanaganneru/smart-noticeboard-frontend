@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin - Manage Notices</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{
+    margin:0;
+    font-family:"Segoe UI",sans-serif;
+    background:#eef4ff;
+  }
+
+  /* TOP ADMIN BAR */
+  .admin-bar{
+    background:#0a3cff;
+    padding:12px 18px;
+    color:#fff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .admin-bar-links a{
+    color:#fff;
+    text-decoration:none;
+    margin-left:16px;
+    font-size:13px;
+  }
+
+  header{
+    padding:16px 20px;
+  }
+  header h1{
+    margin:0;
+    font-size:22px;
+    color:#0a3cff;
+  }
+  header p{
+    margin:4px 0 0;
+    font-size:13px;
+    color:#555;
+  }
+
+  .container{
+    max-width:900px;
+    margin:0 auto 40px;
+    background:#fff;
+    padding:18px 20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12);
+  }
+
+  .top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .search-box input{
+    padding:8px 10px;
+    border-radius:8px;
+    border:2px solid #0a3cff;
+    font-size:13px;
+    min-width:200px;
+    outline:none;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th, td{
+    padding:8px 6px;
+    border-bottom:1px solid #e0e0e0;
+    text-align:left;
+    vertical-align:top;
+  }
+  th{
+    background:#f3f6ff;
+    font-weight:600;
+    color:#333;
+  }
+  tr:hover{
+    background:#f9fbff;
+  }
+  .type-badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    background:#e0edff;
+    color:#0a3cff;
+    font-size:11px;
+  }
+  .year-branch{
+    font-size:11px;
+    color:#555;
+  }
+
+  .btn-delete{
+    padding:5px 10px;
+    border:none;
+    border-radius:6px;
+    background:#ff0033;
+    color:#fff;
+    font-size:12px;
+    cursor:pointer;
+  }
+
+  .link-btn{
+    display:inline-block;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+    background:#0a3cff;
+    color:#fff;
+    text-decoration:none;
+    margin-top:4px;
+  }
+
+  .empty-msg{
+    text-align:center;
+    margin-top:14px;
+    font-size:14px;
+    color:#555;
+  }
+
+  .status{
+    margin-top:8px;
+    font-size:13px;
+    color:#0b9b37;
+  }
+  .status.error{color:#ff0033;}
+
+  @media (max-width:700px){
+    table, thead, tbody, th, td, tr { display:block; }
+    thead{ display:none; }
+    tr{
+      margin-bottom:10px;
+      border-radius:10px;
+      border:1px solid #e0e0e0;
+      padding:6px 8px;
+    }
+    td{
+      border:none;
+      padding:4px 0;
+    }
+    td::before{
+      content:attr(data-label);
+      font-weight:600;
+      margin-right:4px;
+      color:#333;
+    }
+  }
+</style>
+
+<script>
+  // Protect page: only logged-in admin can view
+  if (localStorage.getItem("isAdminLoggedIn") !== "yes") {
+    window.location.href = "login.html";
+  }
+</script>
+</head>
+<body>
+
+<!-- ADMIN NAVBAR -->
+<div class="admin-bar">
+  <div><strong>Admin Panel</strong> · Manage Notices</div>
+  <div class="admin-bar-links">
+    <a href="upload.html">Add Notice</a>
+    <a href="index.html">Main Site</a>
+    <a href="#" id="logoutLink">Logout</a>
+  </div>
+</div>
+
+<header>
+  <h1>📋 All Notices</h1>
+  <p>View, search and delete notices added by admin.</p>
+</header>
+
+<div class="container">
+  <div class="top-row">
+    <div class="search-box">
+      <input id="searchBox" placeholder="Search by title / type / branch / year...">
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div id="tableWrapper"></div>
+
+  <p id="emptyMsg" class="empty-msg" style="display:none;">
+    No notices available. Go to "Add Notice" to create one.
+  </p>
+</div>
+
+<script>
+  const logoutLink  = document.getElementById("logoutLink");
+  const searchBox   = document.getElementById("searchBox");
+  const tableWrap   = document.getElementById("tableWrapper");
+  const emptyMsg    = document.getElementById("emptyMsg");
+  const statusEl    = document.getElementById("status");
+
+  let allNotices = [];
+
+  if (logoutLink) {
+    logoutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("isAdminLoggedIn");
+      window.location.href = "login.html";
+    });
+  }
+
+  async function loadNotices() {
+    statusEl.textContent = "Loading notices...";
+    statusEl.className = "status";
+    try {
+      const res = await fetch("http://localhost:5000/notices");
+      allNotices = await res.json();
+      renderTable();
+      statusEl.textContent = "";
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "Error loading notices.";
+      statusEl.className = "status error";
+    }
+  }
+
+  function renderTable() {
+    const q = (searchBox.value || "").toLowerCase();
+
+    const filtered = allNotices.filter(n => {
+      const text = `
+        ${n.title || ""} 
+        ${n.type || ""} 
+        ${n.branch || ""} 
+        ${n.year || ""} 
+        ${n.body || ""}
+      `.toLowerCase();
+      return text.includes(q);
+    });
+
+    if (!filtered.length) {
+      tableWrap.innerHTML = "";
+      emptyMsg.style.display = "block";
+      return;
+    }
+    emptyMsg.style.display = "none";
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type / Year / Branch</th>
+            <th>Date</th>
+            <th>Attachment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    filtered.forEach(n => {
+      const shortBody = (n.body || "").length > 80 
+        ? (n.body || "").slice(0,77) + "..." 
+        : (n.body || "");
+
+      const type = n.type || "General";
+      const year = n.year || "ALL";
+      const branch = n.branch || "ALL";
+
+      const linkHtml = n.file 
+        ? `<a href="${n.file}" target="_blank" rel="noopener" class="link-btn">View PDF / Link</a>`
+        : `<span style="font-size:12px;color:#777;">None</span>`;
+
+      html += `
+        <tr>
+          <td data-label="Title">
+            <strong>${n.title || "Untitled"}</strong><br>
+            <span style="font-size:12px;color:#555;">${shortBody}</span>
+          </td>
+          <td data-label="Details">
+            <span class="type-badge">${type}</span><br>
+            <span class="year-branch">Year: ${year}, Branch: ${branch}</span>
+          </td>
+          <td data-label="Date">${n.date || "-"}</td>
+          <td data-label="Attachment">${linkHtml}</td>
+          <td data-label="Actions">
+            <button class="btn-delete" onclick="deleteNotice('${n._id}')">Delete</button>
+
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    tableWrap.innerHTML = html;
+  }
+
+  async function deleteNotice(id) {
+    const confirmMsg = "Are you sure you want to delete this notice?";
+    if (!confirm(confirmMsg)) return;
+
+    statusEl.textContent = "Deleting...";
+    statusEl.className = "status";
+
+    try {
+      const res = await fetch("http://localhost:5000/notices/" + id, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Delete failed");
+
+      // Remove from local list & re-render
+      allNotices = allNotices.filter(n => n.id !== id);
+      renderTable();
+
+      statusEl.textContent = "Notice deleted.";
+      statusEl.className = "status";
+      setTimeout(() => { statusEl.textContent = ""; }, 1500);
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "Error deleting notice.";
+      statusEl.className = "status error";
+    }
+  }
+
+  // expose to HTML onclick
+  window.deleteNotice = deleteNotice;
+
+  searchBox.addEventListener("input", renderTable);
+
+  // Load on page start
+  loadNotices();
+</script>
+
+</body>
+</html>

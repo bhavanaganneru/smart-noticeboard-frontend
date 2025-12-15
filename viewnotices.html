@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin - View Notices (Demo)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{
+    margin:0;
+    font-family:"Segoe UI",sans-serif;
+    background:#eef4ff;
+  }
+  .admin-bar{
+    background:#0a3cff;
+    padding:12px 18px;
+    color:#fff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .admin-bar a{
+    color:#fff;
+    text-decoration:none;
+    margin-left:16px;
+    font-size:13px;
+  }
+  .container{
+    max-width:900px;
+    margin:20px auto;
+    padding:12px;
+  }
+  h1{
+    margin:0 0 10px;
+    font-size:22px;
+    color:#0a3cff;
+  }
+  p.sub{
+    margin:0 0 16px;
+    font-size:13px;
+    color:#555;
+  }
+  .notice-card{
+    background:#fff;
+    padding:14px 16px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom:12px;
+  }
+  .notice-card h3{
+    margin:0 0 6px;
+    font-size:16px;
+  }
+  .meta{
+    font-size:12px;
+    color:#666;
+    margin-bottom:6px;
+  }
+  .tag{
+    display:inline-block;
+    padding:2px 8px;
+    font-size:11px;
+    border-radius:10px;
+    background:#e0edff;
+    color:#0a3cff;
+    margin-right:4px;
+  }
+  .actions{
+    margin-top:8px;
+    font-size:12px;
+  }
+  .link-btn{
+    text-decoration:none;
+    font-size:12px;
+    color:#0a3cff;
+    margin-right:10px;
+  }
+
+  @media (max-width:600px){
+    .container{ margin:10px; }
+    h1{ font-size:19px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-bar">
+  <div><strong>Admin Panel</strong> · View Notices (Demo)</div>
+  <div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html">Main Site</a>
+  </div>
+</div>
+
+<div class="container">
+  <h1>📁 All Notices (Sample)</h1>
+  <p class="sub">These are sample cards just to show how real data will look here later.</p>
+
+  <div class="notice-card">
+    <h3>Mid-Term Exams Schedule Released</h3>
+    <p class="meta">
+      <span class="tag">Exam</span>
+      <span class="tag">Year: 2</span>
+      <span class="tag">Branch: CSE</span>
+      <span class="tag">Date: 10-01-2025</span>
+    </p>
+    <p>Mid-term exams for all CSE 2nd year students will begin from 10th January. Check the timetable PDF.</p>
+    <div class="actions">
+      <a href="#" class="link-btn">🔍 View</a>
+      <a href="#" class="link-btn">✏️ Edit</a>
+      <a href="#" class="link-btn">🗑 Delete</a>
+    </div>
+  </div>
+
+  <div class="notice-card">
+    <h3>TCS Campus Drive</h3>
+    <p class="meta">
+      <span class="tag">Placement</span>
+      <span class="tag">Company: TCS</span>
+      <span class="tag">Year: 4</span>
+      <span class="tag">All Branches</span>
+    </p>
+    <p>TCS drive for 4th year students. Online test followed by interview rounds. Registration link will be shared soon.</p>
+    <div class="actions">
+      <a href="#" class="link-btn">🔍 View</a>
+      <a href="#" class="link-btn">✏️ Edit</a>
+      <a href="#" class="link-btn">🗑 Delete</a>
+    </div>
+  </div>
+
+  <div class="notice-card">
+    <h3>Workshop on AI & ML</h3>
+    <p class="meta">
+      <span class="tag">Workshop</span>
+      <span class="tag">CSE (AIML)</span>
+      <span class="tag">3rd Year</span>
+      <span class="tag">Offline</span>
+    </p>
+    <p>One day workshop on Artificial Intelligence and Machine Learning in the main seminar hall.</p>
+    <div class="actions">
+      <a href="#" class="link-btn">🔍 View</a>
+      <a href="#" class="link-btn">✏️ Edit</a>
+      <a href="#" class="link-btn">🗑 Delete</a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
